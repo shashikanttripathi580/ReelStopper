@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#99000000"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:background="#F018181B"
+        android:padding="28dp"
+        android:elevation="12dp">
+
+        <!-- Milestone Badge -->
+        <TextView
+            android:id="@+id/tv_reminder_milestone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌱 50 reels"
+            android:textColor="#FACC15"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tv_reminder_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time for a break?"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Body -->
+        <TextView
+            android:id="@+id/tv_reminder_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="You've watched 50 reels. Take a short break."
+            android:textColor="#A1A1AA"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Take a Break Button -->
+        <Button
+            android:id="@+id/btn_take_break"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Take a Break"
+            android:textAllCaps="false"
+            android:textColor="#09090B"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="#22C55E"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Continue Watching Link -->
+        <TextView
+            android:id="@+id/btn_continue_watching"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Continue Watching"
+            android:textColor="#71717A"
+            android:textSize="14sp"
+            android:padding="8dp" />
+
+    </LinearLayout>
+</FrameLayout>

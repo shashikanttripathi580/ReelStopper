@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Android
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+*.iml
+.idea/
+
+# Gradle wrapper caches
+.gradle/
+build/
+
+# React Native
+.metro-health-check*
+
+# OS Files
+.DS_Store
+Thumbs.db

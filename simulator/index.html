@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReelStopper — Interactive Simulation & Architecture Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left / Center: Interactive Phone Simulation -->
+    <main class="preview-stage">
+      <div class="stage-header">
+        <div class="brand">
+          <span class="brand-icon">🌱</span>
+          <div>
+            <h1 class="brand-title">ReelStopper</h1>
+            <p class="brand-subtitle">MVP v1.0 • Android Accessibility & Overlay Simulator</p>
+          </div>
+        </div>
+
+        <!-- Phone Mode Switcher -->
+        <div class="mode-pills">
+          <button id="btnModeReels" class="mode-pill active" onclick="switchPhoneMode('reels')">
+            <span class="pill-dot"></span> Simulated Reels Feed (Overlay Live)
+          </button>
+          <button id="btnModeApp" class="mode-pill" onclick="switchPhoneMode('app')">
+            ReelStopper App UI
+          </button>
+        </div>
+      </div>
+
+      <!-- Smartphone Frame -->
+      <div class="device-wrapper">
+        <div class="smartphone-frame">
+          <div class="speaker-notch">
+            <div class="camera-lens"></div>
+          </div>
+
+          <div class="phone-status-bar">
+            <span class="phone-time" id="phoneClock">09:41</span>
+            <div class="status-icons">
+              <span>5G</span>
+              <span>📶</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <!-- SCREEN 1: SIMULATED REELS FEED -->
+          <div id="phoneScreenReels" class="phone-screen active">
+            <!-- Simulated Reel Video Canvas / Backdrop -->
+            <div class="reel-video-container" id="reelVideoBg">
+              <div class="reel-ambient-orb orb-1"></div>
+              <div class="reel-ambient-orb orb-2"></div>
+              <div class="reel-gradient-overlay"></div>
+              
+              <!-- Top bar in Reels app -->
+              <div class="reel-top-bar">
+                <span class="reels-title" id="platformTitle">Reels</span>
+                <div class="reels-top-icons">
+                  <span>📷</span>
+                </div>
+              </div>
+
+              <!-- Reel Content Details (Bottom Left) -->
+              <div class="reel-meta-container">
+                <div class="reel-author">
+                  <div class="author-avatar" id="reelAvatar">🌱</div>
+                  <span class="author-name" id="reelAuthor">@nature_daily</span>
+                  <button class="btn-follow">Follow</button>
+                </div>
+                <p class="reel-caption" id="reelCaption">
+                  Finding calm amidst the endless digital noise. Remember to breathe. 🌿
+                </p>
+                <div class="reel-audio-tag">
+                  <span class="audio-icon">🎵</span>
+                  <span class="audio-title" id="reelAudio">Original Audio — Nature Meditations</span>
+                </div>
+              </div>
+
+              <!-- Reel Action Buttons Column (Right Side) -->
+              <div class="reel-actions-column">
+                <!-- REELSTOPPER FLOATING COUNTER (Positioned above Like button) -->
+                <div id="floatingOverlayCounter" class="floating-counter-pill" onclick="handleCounterPillClick()" title="ReelStopper Overlay">
+                  <span id="overlayLeaf" class="overlay-leaf">🌱</span>
+                  <span id="overlayCount" class="overlay-count">0</span>
+                </div>
+
+                <!-- Native Reel Action Buttons -->
+                <div class="reel-action-btn like-btn">
+                  <div class="action-icon">♡</div>
+                  <span class="action-count">234K</span>
+                </div>
+
+                <div class="reel-action-btn">
+                  <div class="action-icon">💬</div>
+                  <span class="action-count">1,234</span>
+                </div>
+
+                <div class="reel-action-btn">
+                  <div class="action-icon">↗</div>
+                  <span class="action-count">12.3K</span>
+                </div>
+
+                <div class="reel-action-btn">
+                  <div class="action-icon">•••</div>
+                </div>
+
+                <div class="reel-audio-disc">
+                  <div class="disc-inner"></div>
+                </div>
+              </div>
+
+              <!-- Reel Swipe / Nav Overlay Indicators -->
+              <div class="reel-nav-controls">
+                <button class="reel-nav-btn" onclick="simulatePreviousReel()" title="Previous Reel">▲</button>
+                <span class="reel-index-indicator" id="reelIndexIndicator">Reel 1 / 10</span>
+                <button class="reel-nav-btn" onclick="simulateNextReel()" title="Next Reel">▼</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 2: REELSTOPPER APP SCREENS -->
+          <div id="phoneScreenApp" class="phone-screen">
+            <!-- App Sub-screens container -->
+            <div id="appSubScreenContainer" class="app-sub-screens">
+              
+              <!-- SUB-SCREEN: SPLASH -->
+              <div id="subScreenSplash" class="app-sub-screen">
+                <div class="splash-content">
+                  <div class="splash-badge">🌱</div>
+                  <h2 class="splash-title">ReelStopper</h2>
+                  <p class="splash-tagline">See your scrolling before it becomes endless.</p>
+                  <button class="btn-app-primary" onclick="setAppSubScreen('onboarding')">Enter App</button>
+                </div>
+              </div>
+
+              <!-- SUB-SCREEN: ONBOARDING -->
+              <div id="subScreenOnboarding" class="app-sub-screen">
+                <div class="app-screen-header">
+                  <span>🌱 Awareness</span>
+                  <button class="btn-text" onclick="setAppSubScreen('dashboard')">Skip</button>
+                </div>
+                <div class="onboarding-body">
+                  <div class="onboard-icon" id="onboardEmoji">🌱</div>
+                  <h2 class="onboard-title" id="onboardTitle">Awareness, Not Control</h2>
+                  <p class="onboard-desc" id="onboardDesc">
+                    ReelStopper displays a tiny counter near your reel action buttons. It increases as you watch, changing color to build gentle awareness.
+                  </p>
+                  <div class="onboard-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                  </div>
+                  <button class="btn-app-primary" onclick="setAppSubScreen('permissions')">Continue</button>
+                </div>
+              </div>
+
+              <!-- SUB-SCREEN: PERMISSIONS -->
+              <div id="subScreenPermissions" class="app-sub-screen">
+                <div class="app-screen-header">
+                  <span>🛡️ Android Setup</span>
+                </div>
+                <div class="permissions-body">
+                  <h3 class="perm-main-title">Required Permissions</h3>
+                  <p class="perm-main-desc">ReelStopper works 100% locally. No account or internet required.</p>
+                  
+                  <div class="perm-item">
+                    <div class="perm-info">
+                      <strong>Accessibility Service</strong>
+                      <p>Detects reel scroll transitions in supported apps.</p>
+                    </div>
+                    <span class="badge-granted">✓ Active</span>
+                  </div>
+
+                  <div class="perm-item">
+                    <div class="perm-info">
+                      <strong>Display Over Other Apps</strong>
+                      <p>Anchors the small leaf counter above the Like button.</p>
+                    </div>
+                    <span class="badge-granted">✓ Active</span>
+                  </div>
+
+                  <button class="btn-app-primary" onclick="setAppSubScreen('dashboard')">Start Tracking</button>
+                </div>
+              </div>
+
+              <!-- SUB-SCREEN: DASHBOARD (PRD Section 19) -->
+              <div id="subScreenDashboard" class="app-sub-screen active">
+                <div class="app-navbar">
+                  <div class="app-brand">
+                    <span>🌱</span> <strong>ReelStopper</strong>
+                  </div>
+                  <div class="app-nav-icons">
+                    <button class="btn-nav-icon" onclick="setAppSubScreen('history')" title="History">📊</button>
+                    <button class="btn-nav-icon" onclick="setAppSubScreen('settings')" title="Settings">⚙️</button>
+                  </div>
+                </div>
+
+                <div class="dashboard-body">
+                  <!-- Main Hero Card -->
+                  <div class="dash-hero-card" id="dashHeroCard">
+                    <div class="dash-status-pill">
+                      <span class="status-pulse" id="dashPulseDot"></span>
+                      <span id="dashStatusText">Tracking Active</span>
+                    </div>
+
+                    <div class="dash-leaf" id="dashLeafIcon">🌱</div>
+                    
+                    <div class="dash-counter-row">
+                      <span class="dash-count-big" id="dashCountBig">0</span>
+                      <span class="dash-count-denom">/ 100</span>
+                    </div>
+                    
+                    <span class="dash-count-label">Reels Watched</span>
+                    <span class="dash-stage-badge" id="dashStageBadge">Just started</span>
+
+                    <div class="dash-meters-row">
+                      <div class="meter-col">
+                        <strong id="dashUntilBreak">50</strong>
+                        <span>until break</span>
+                      </div>
+                      <div class="meter-divider"></div>
+                      <div class="meter-col">
+                        <strong id="dashUntilMax">100</strong>
+                        <span>until 100</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tracking Toggle Button -->
+                  <button id="btnTrackingToggle" class="btn-dash-action" onclick="toggleTracking()">
+                    Pause Tracking
+                  </button>
+
+                  <!-- Today's Total Summary -->
+                  <div class="dash-summary-card">
+                    <div>
+                      <strong>Today's Total</strong>
+                      <p>All sessions combined</p>
+                    </div>
+                    <span class="today-count-badge" id="dashTodayTotal">74 reels</span>
+                  </div>
+
+                  <!-- Reset Button -->
+                  <button class="btn-reset-link" onclick="resetCurrentSession()">
+                    Reset Current Count (0 reels)
+                  </button>
+                </div>
+              </div>
+
+              <!-- SUB-SCREEN: HISTORY (PRD Section 20) -->
+              <div id="subScreenHistory" class="app-sub-screen">
+                <div class="app-navbar">
+                  <button class="btn-nav-back" onclick="setAppSubScreen('dashboard')">← Dashboard</button>
+                  <strong>History</strong>
+                  <div style="width: 40px;"></div>
+                </div>
+
+                <div class="history-body">
+                  <p class="history-note">Local device history only • Offline safe</p>
+                  
+                  <div class="history-list">
+                    <div class="history-card-item">
+                      <div class="hist-row">
+                        <div>
+                          <strong>Today</strong>
+                          <span class="hist-date">Oct 02</span>
+                        </div>
+                        <span class="hist-count" id="histCountToday">74 reels</span>
+                      </div>
+                      <div class="hist-bar-bg"><div class="hist-bar-fill" style="width: 74%; background: #FB923C;"></div></div>
+                    </div>
+
+                    <div class="history-card-item">
+                      <div class="hist-row">
+                        <div>
+                          <strong>Yesterday</strong>
+                          <span class="hist-date">Oct 01</span>
+                        </div>
+                        <span class="hist-count">91 reels</span>
+                      </div>
+                      <div class="hist-bar-bg"><div class="hist-bar-fill" style="width: 91%; background: #F87171;"></div></div>
+                    </div>
+
+                    <div class="history-card-item">
+                      <div class="hist-row">
+                        <div>
+                          <strong>Oct 30</strong>
+                          <span class="hist-date">Sep 30</span>
+                        </div>
+                        <span class="hist-count">63 reels</span>
+                      </div>
+                      <div class="hist-bar-bg"><div class="hist-bar-fill" style="width: 63%; background: #FB923C;"></div></div>
+                    </div>
+
+                    <div class="history-card-item">
+                      <div class="hist-row">
+                        <div>
+                          <strong>Oct 29</strong>
+                          <span class="hist-date">Sep 29</span>
+                        </div>
+                        <span class="hist-count">48 reels</span>
+                      </div>
+                      <div class="hist-bar-bg"><div class="hist-bar-fill" style="width: 48%; background: #BEF264;"></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SUB-SCREEN: SETTINGS (PRD Section 23) -->
+              <div id="subScreenSettings" class="app-sub-screen">
+                <div class="app-navbar">
+                  <button class="btn-nav-back" onclick="setAppSubScreen('dashboard')">← Dashboard</button>
+                  <strong>Settings</strong>
+                  <div style="width: 40px;"></div>
+                </div>
+
+                <div class="settings-body">
+                  <div class="settings-group">
+                    <span class="settings-group-title">TRACKING</span>
+                    <div class="settings-item">
+                      <div>
+                        <strong>Enable Reel Tracking</strong>
+                        <p>Accessibility scroll detection</p>
+                      </div>
+                      <input type="checkbox" id="chkTracking" checked onchange="toggleTracking()">
+                    </div>
+                  </div>
+
+                  <div class="settings-group">
+                    <span class="settings-group-title">BREAK THRESHOLD</span>
+                    <div class="threshold-pill-group">
+                      <button class="th-btn" onclick="setBreakThreshold(25)">25</button>
+                      <button class="th-btn active" onclick="setBreakThreshold(50)">50</button>
+                      <button class="th-btn" onclick="setBreakThreshold(75)">75</button>
+                      <button class="th-btn" onclick="setBreakThreshold(100)">100</button>
+                    </div>
+                  </div>
+
+                  <div class="settings-group">
+                    <span class="settings-group-title">NOTIFICATIONS</span>
+                    <div class="settings-item">
+                      <div>
+                        <strong>Local Break Reminders</strong>
+                        <p>Triggers at 50 and 100 reels</p>
+                      </div>
+                      <input type="checkbox" id="chkNotifications" checked>
+                    </div>
+                  </div>
+
+                  <div class="settings-group">
+                    <span class="settings-group-title">DATA MANAGEMENT</span>
+                    <button class="btn-danger-outline" onclick="resetCurrentSession()">Reset Current Session</button>
+                    <button class="btn-danger-outline" onclick="clearHistory()">Clear Local History</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- BREAK REMINDER POPUP MODAL (PRD Sections 9 & 12) -->
+          <div id="breakReminderModal" class="break-modal-overlay">
+            <div class="break-modal-card">
+              <div class="break-badge" id="modalBadge">🌱 50 reels</div>
+              <h3 class="break-title" id="modalTitle">Time for a break?</h3>
+              <p class="break-desc" id="modalDesc">You've watched 50 reels. Take a short break.</p>
+              
+              <button class="btn-break-action" id="modalBtnBreak" onclick="triggerCalmBreak()">
+                Take a Break
+              </button>
+              <button class="btn-continue-link" onclick="dismissBreakReminder()">
+                Continue Watching
+              </button>
+            </div>
+          </div>
+
+          <!-- RELAXING MINDFUL BREATHING POPUP (When user clicks Take a Break) -->
+          <div id="calmBreathingModal" class="break-modal-overlay">
+            <div class="breathing-card">
+              <span class="breathing-emoji">🌿</span>
+              <h3 class="breathing-title">Mindful Pause</h3>
+              <div class="breathing-circle-wrapper">
+                <div class="breathing-circle" id="breathingCircle"></div>
+                <span class="breathing-guide-text" id="breathingText">Breathe in...</span>
+              </div>
+              <p class="breathing-sub">Give your eyes and mind 30 seconds of rest.</p>
+              <button class="btn-app-primary" onclick="closeBreathingModal()">I'm Refreshed</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- Right: Interactive Control Center & Architecture Inspector -->
+    <aside class="control-panel">
+      <div class="panel-section">
+        <h2 class="panel-heading">⚡ Simulation Controls</h2>
+        <p class="panel-sub">Simulate reel scrolling, accessibility triggers, and milestones.</p>
+
+        <div class="action-grid">
+          <button class="btn-ctrl primary" onclick="simulateNextReel()">
+            <span>⬇️</span> Next Reel (+1)
+          </button>
+          <button class="btn-ctrl" onclick="simulateDuplicateEvent()">
+            <span>🔄</span> Duplicate Event (Ignored)
+          </button>
+          <button class="btn-ctrl" id="btnAutoScroll" onclick="toggleAutoScroll()">
+            <span>▶️</span> Auto-Scroll Feed
+          </button>
+          <button class="btn-ctrl danger" onclick="resetCurrentSession()">
+            <span>↺</span> Reset to 0
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Jump to PRD Milestones -->
+      <div class="panel-section">
+        <h3 class="section-title">🎯 Jump to PRD Milestones</h3>
+        <div class="milestone-chips">
+          <button class="chip" onclick="jumpToCount(0)">0 (Translucent)</button>
+          <button class="chip" onclick="jumpToCount(8)">8 (Soft Green)</button>
+          <button class="chip" onclick="jumpToCount(18)">18 (Green)</button>
+          <button class="chip" onclick="jumpToCount(37)">37 (Green→Yellow)</button>
+          <button class="chip highlight-yellow" onclick="jumpToCount(50)">50 (Yellow Reminder)</button>
+          <button class="chip" onclick="jumpToCount(70)">70 (Orange)</button>
+          <button class="chip" onclick="jumpToCount(95)">95 (Orange→Red)</button>
+          <button class="chip highlight-red" onclick="jumpToCount(100)">100 (Red Max Alert)</button>
+        </div>
+      </div>
+
+      <!-- Color Progression Inspector (PRD Section 8 & 13) -->
+      <div class="panel-section">
+        <h3 class="section-title">🎨 Active Color Progression</h3>
+        <div class="color-stage-card" id="inspectorStageCard">
+          <div class="stage-card-top">
+            <span class="stage-emoji" id="inspEmoji">🌱</span>
+            <div>
+              <strong id="inspStageName">0 Reels (Just started)</strong>
+              <p id="inspMeaning">Muted / translucent initial stage</p>
+            </div>
+          </div>
+          <div class="stage-color-row">
+            <div class="color-chip-sample" id="inspColorSample"></div>
+            <code class="color-code" id="inspColorCode">rgba(161, 161, 170, 0.7)</code>
+          </div>
+        </div>
+
+        <div class="stages-reference-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Reels</th>
+                <th>Color</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="rowStage0" class="active"><td>0</td><td><span class="dot-c c-gray"></span> Gray</td><td>Just started</td></tr>
+              <tr id="rowStage1"><td>1–10</td><td><span class="dot-c c-softgreen"></span> Soft Green</td><td>Low count</td></tr>
+              <tr id="rowStage2"><td>11–25</td><td><span class="dot-c c-green"></span> Green</td><td>Normal</td></tr>
+              <tr id="rowStage3"><td>26–49</td><td><span class="dot-c c-lime"></span> Lime</td><td>Approaching break</td></tr>
+              <tr id="rowStage4"><td>50</td><td><span class="dot-c c-yellow"></span> Yellow</td><td>Break reminder</td></tr>
+              <tr id="rowStage5"><td>51–74</td><td><span class="dot-c c-orange"></span> Orange</td><td>Continued scrolling</td></tr>
+              <tr id="rowStage6"><td>75–99</td><td><span class="dot-c c-orangered"></span> Orange-Red</td><td>High count</td></tr>
+              <tr id="rowStage7"><td>100+</td><td><span class="dot-c c-red"></span> Red</td><td>Strong reminder</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Live Event Bus / Log -->
+      <div class="panel-section">
+        <div class="section-title-row">
+          <h3 class="section-title">📡 Native Accessibility Event Log</h3>
+          <button class="btn-clear-log" onclick="clearEventLog()">Clear</button>
+        </div>
+        <div class="terminal-log" id="eventTerminalLog">
+          <div class="log-line info">[System] ReelStopper Accessibility Service initialized.</div>
+          <div class="log-line info">[System] WindowManager overlay mounted above Like button.</div>
+        </div>
+      </div>
+
+      <!-- Android Architecture Specs -->
+      <div class="panel-section architecture-meta">
+        <h3 class="section-title">📐 Architecture Summary</h3>
+        <ul class="arch-list">
+          <li><strong>Platform:</strong> Android (Kotlin Native + React Native)</li>
+          <li><strong>Detection:</strong> <code>AccessibilityService</code> (filter: Instagram / YouTube)</li>
+          <li><strong>Debouncing:</strong> 1200ms Dwell Time + UI node signature comparison</li>
+          <li><strong>Floating Pill:</strong> <code>TYPE_APPLICATION_OVERLAY</code> (Non-focusable)</li>
+          <li><strong>Storage:</strong> <code>AsyncStorage</code> (Zero cloud dependency)</li>
+          <li><strong>Cost:</strong> $0 / Local-only / Offline-first</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

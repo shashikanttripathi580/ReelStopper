@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/counter_container"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:elevation="8dp"
+    android:clickable="true"
+    android:focusable="false">
+
+    <!-- Leaf / Awareness Icon -->
+    <TextView
+        android:id="@+id/tv_leaf_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🌱"
+        android:textSize="18sp"
+        android:gravity="center" />
+
+    <!-- Live Counter Number -->
+    <TextView
+        android:id="@+id/tv_counter_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:layout_marginTop="2dp" />
+
+</LinearLayout>

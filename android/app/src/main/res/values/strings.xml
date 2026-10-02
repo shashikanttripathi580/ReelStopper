@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">ReelStopper</string>
+    <string name="accessibility_service_description">ReelStopper uses accessibility services solely to detect when you scroll to a new reel or short video to increment your awareness counter. No video content, personal data, or keystrokes are recorded or transmitted off your device.</string>
+    <string name="break_reminder_title_50">Time for a break?</string>
+    <string name="break_reminder_body_50">You\'ve watched 50 reels. Take a short break.</string>
+    <string name="break_reminder_title_100">100 reels watched</string>
+    <string name="break_reminder_body_100">Consider taking a longer break and giving your mind some rest.</string>
+</resources>
