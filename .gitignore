@@ -24,3 +24,7 @@ build/
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Build Artifacts
+build-output/
+
