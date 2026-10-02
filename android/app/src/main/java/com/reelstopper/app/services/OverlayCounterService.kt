@@ -141,6 +141,10 @@ class OverlayCounterService : Service() {
 
     private fun createFloatingView() {
         if (overlayView != null) return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            // Overlay permission not granted yet by user; skip until permitted
+            return
+        }
 
         val inflater = LayoutInflater.from(this)
         overlayView = inflater.inflate(R.layout.floating_counter_layout, null)
