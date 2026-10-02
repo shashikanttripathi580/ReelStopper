@@ -23,63 +23,105 @@ class NativeBridgeService {
   }
 
   async isAccessibilityPermissionGranted(): Promise<boolean> {
-    if (Platform.OS === 'android' && ReelStopperModule) {
-      return await ReelStopperModule.isAccessibilityPermissionGranted();
+    try {
+      if (Platform.OS === 'android' && ReelStopperModule?.isAccessibilityPermissionGranted) {
+        return await ReelStopperModule.isAccessibilityPermissionGranted();
+      }
+    } catch (e) {
+      console.warn('NativeBridge: isAccessibilityPermissionGranted error', e);
     }
     return false;
   }
 
   openAccessibilitySettings(): void {
-    if (Platform.OS === 'android' && ReelStopperModule) {
-      ReelStopperModule.openAccessibilitySettings();
+    try {
+      if (Platform.OS === 'android' && ReelStopperModule?.openAccessibilitySettings) {
+        ReelStopperModule.openAccessibilitySettings();
+      }
+    } catch (e) {
+      console.warn('NativeBridge: openAccessibilitySettings error', e);
     }
   }
 
   async isOverlayPermissionGranted(): Promise<boolean> {
-    if (Platform.OS === 'android' && ReelStopperModule) {
-      return await ReelStopperModule.isOverlayPermissionGranted();
+    try {
+      if (Platform.OS === 'android' && ReelStopperModule?.isOverlayPermissionGranted) {
+        return await ReelStopperModule.isOverlayPermissionGranted();
+      }
+    } catch (e) {
+      console.warn('NativeBridge: isOverlayPermissionGranted error', e);
     }
     return true;
   }
 
   openOverlaySettings(): void {
-    if (Platform.OS === 'android' && ReelStopperModule) {
-      ReelStopperModule.openOverlaySettings();
+    try {
+      if (Platform.OS === 'android' && ReelStopperModule?.openOverlaySettings) {
+        ReelStopperModule.openOverlaySettings();
+      }
+    } catch (e) {
+      console.warn('NativeBridge: openOverlaySettings error', e);
     }
   }
 
   async startTracking(): Promise<boolean> {
-    if (Platform.OS === 'android' && ReelStopperModule) {
-      return await ReelStopperModule.startTracking();
+    try {
+      if (Platform.OS === 'android' && ReelStopperModule?.startTracking) {
+        return await ReelStopperModule.startTracking();
+      }
+    } catch (e) {
+      console.warn('NativeBridge: startTracking error', e);
     }
     return true;
   }
 
   async stopTracking(): Promise<boolean> {
-    if (Platform.OS === 'android' && ReelStopperModule) {
-      return await ReelStopperModule.stopTracking();
+    try {
+      if (Platform.OS === 'android' && ReelStopperModule?.stopTracking) {
+        return await ReelStopperModule.stopTracking();
+      }
+    } catch (e) {
+      console.warn('NativeBridge: stopTracking error', e);
     }
     return true;
   }
 
   async resetSession(): Promise<number> {
-    if (Platform.OS === 'android' && ReelStopperModule) {
-      return await ReelStopperModule.resetSession();
+    try {
+      if (Platform.OS === 'android' && ReelStopperModule?.resetSession) {
+        return await ReelStopperModule.resetSession();
+      }
+    } catch (e) {
+      console.warn('NativeBridge: resetSession error', e);
     }
     return 0;
   }
 
   async getCurrentCount(): Promise<number> {
-    if (Platform.OS === 'android' && ReelStopperModule) {
-      return await ReelStopperModule.getCurrentCount();
+    try {
+      if (Platform.OS === 'android' && ReelStopperModule?.getCurrentCount) {
+        return await ReelStopperModule.getCurrentCount();
+      }
+    } catch (e) {
+      console.warn('NativeBridge: getCurrentCount error', e);
     }
     return 0;
   }
 
   subscribeToReelIncrements(callback: (data: ReelEventPayload) => void): () => void {
-    if (this.eventEmitter) {
-      const subscription = this.eventEmitter.addListener('onReelIncremented', callback);
-      return () => subscription.remove();
+    try {
+      if (this.eventEmitter) {
+        const subscription = this.eventEmitter.addListener('onReelIncremented', callback);
+        return () => {
+          try {
+            subscription.remove();
+          } catch (e) {
+            // Ignore
+          }
+        };
+      }
+    } catch (e) {
+      console.warn('NativeBridge: subscribe error', e);
     }
     return () => {};
   }

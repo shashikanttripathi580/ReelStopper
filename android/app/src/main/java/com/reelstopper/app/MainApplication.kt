@@ -1,9 +1,9 @@
 package com.reelstopper.app
 
 import android.app.Application
+import android.util.Log
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
-import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
@@ -28,7 +28,11 @@ class MainApplication : Application(), ReactApplication {
 
     override fun onCreate() {
         super.onCreate()
-        SoLoader.init(this, false)
+        try {
+            SoLoader.init(this, false)
+        } catch (e: Exception) {
+            Log.e("MainApplication", "SoLoader init exception", e)
+        }
         if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
             load()
         }

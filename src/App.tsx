@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
+import { SafeAreaView, StatusBar, StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { THEME } from './theme/colors';
 import { DayHistory, ReelSession, ScreenType, UserSettings } from './types';
 import { StorageService } from './services/StorageService';
@@ -12,7 +12,55 @@ import { HistoryScreen } from './screens/HistoryScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { BreakReminderModal } from './components/BreakReminderModal';
 
-export const App: React.FC = () => {
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.warn('Uncaught error caught by ErrorBoundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <SafeAreaView style={styles.safeArea}>
+          <StatusBar barStyle="light-content" backgroundColor={THEME.background} />
+          <View style={[styles.container, styles.errorContainer]}>
+            <Text style={styles.errorEmoji}>🌱</Text>
+            <Text style={styles.errorTitle}>ReelStopper</Text>
+            <Text style={styles.errorSubtitle}>
+              An unexpected issue occurred. Tap below to refresh and continue.
+            </Text>
+            <TouchableOpacity
+              style={styles.errorButton}
+              activeOpacity={0.8}
+              onPress={() => this.setState({ hasError: false })}>
+              <Text style={styles.errorButtonText}>Restart ReelStopper</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const MainApp: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('splash');
   const [session, setSession] = useState<ReelSession>({
     currentCount: 0,
@@ -40,64 +88,98 @@ export const App: React.FC = () => {
   }, []);
 
   const loadInitialData = async () => {
-    const loadedSettings = await StorageService.getSettings();
-    const loadedSession = await StorageService.getSession();
-    const loadedToday = await StorageService.getTodayCount();
-    const loadedHistory = await StorageService.getHistory();
+    try {
+      const loadedSettings = await StorageService.getSettings();
+      const loadedSession = await StorageService.getSession();
+      const loadedToday = await StorageService.getTodayCount();
+      const loadedHistory = await StorageService.getHistory();
 
-    setSettings(loadedSettings);
-    setSession(loadedSession);
-    setTodayTotal(loadedToday || 74);
-    setHistory(loadedHistory);
+      setSettings(loadedSettings);
+      setSession(loadedSession);
+      setTodayTotal(loadedToday || 74);
+      setHistory(loadedHistory);
+    } catch (e) {
+      console.warn('Failed to load initial data', e);
+    }
   };
 
   // Subscribe to native reel increment events from Accessibility Service
   useEffect(() => {
-    const unsubscribe = NativeBridge.subscribeToReelIncrements(async (_event) => {
-      const { session: newSession, todayTotal: newToday } =
-        await StorageService.incrementReelCount(1);
-      setSession(newSession);
-      setTodayTotal(newToday);
+    try {
+      const unsubscribe = NativeBridge.subscribeToReelIncrements(async (_event) => {
+        try {
+          const { session: newSession, todayTotal: newToday } =
+            await StorageService.incrementReelCount(1);
+          setSession(newSession);
+          setTodayTotal(newToday);
 
-      if (newSession.currentCount === 50) {
-        setActiveModalMilestone(50);
-      } else if (newSession.currentCount === 100) {
-        setActiveModalMilestone(100);
-      }
-    });
+          if (newSession.currentCount === 50) {
+            setActiveModalMilestone(50);
+          } else if (newSession.currentCount === 100) {
+            setActiveModalMilestone(100);
+          }
+        } catch (e) {
+          console.warn('Error handling reel increment', e);
+        }
+      });
 
-    return () => unsubscribe();
+      return () => {
+        try {
+          unsubscribe();
+        } catch (e) {
+          // Ignore
+        }
+      };
+    } catch (e) {
+      console.warn('Error setting up reel subscription', e);
+    }
   }, []);
 
   const handleToggleTracking = async () => {
-    const nextState = !session.isTracking;
-    const updatedSession = { ...session, isTracking: nextState };
-    setSession(updatedSession);
-    await StorageService.saveSession(updatedSession);
+    try {
+      const nextState = !session.isTracking;
+      const updatedSession = { ...session, isTracking: nextState };
+      setSession(updatedSession);
+      await StorageService.saveSession(updatedSession);
 
-    if (nextState) {
-      await NativeBridge.startTracking();
-    } else {
-      await NativeBridge.stopTracking();
+      if (nextState) {
+        await NativeBridge.startTracking();
+      } else {
+        await NativeBridge.stopTracking();
+      }
+    } catch (e) {
+      console.warn('Error toggling tracking', e);
     }
   };
 
   const handleResetSession = async () => {
-    const reset = await StorageService.resetSession();
-    await NativeBridge.resetSession();
-    setSession(reset);
+    try {
+      const reset = await StorageService.resetSession();
+      await NativeBridge.resetSession();
+      setSession(reset);
+    } catch (e) {
+      console.warn('Error resetting session', e);
+    }
   };
 
   const handleUpdateSettings = async (newSettings: UserSettings) => {
-    setSettings(newSettings);
-    await StorageService.saveSettings(newSettings);
+    try {
+      setSettings(newSettings);
+      await StorageService.saveSettings(newSettings);
+    } catch (e) {
+      console.warn('Error updating settings', e);
+    }
   };
 
   const handleClearHistory = async () => {
-    await StorageService.clearAllHistory();
-    const refreshed = await StorageService.getHistory();
-    setHistory(refreshed);
-    setTodayTotal(0);
+    try {
+      await StorageService.clearAllHistory();
+      const refreshed = await StorageService.getHistory();
+      setHistory(refreshed);
+      setTodayTotal(0);
+    } catch (e) {
+      console.warn('Error clearing history', e);
+    }
   };
 
   return (
@@ -161,6 +243,14 @@ export const App: React.FC = () => {
   );
 };
 
+export const App: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <MainApp />
+    </ErrorBoundary>
+  );
+};
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -169,5 +259,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: THEME.background,
+  },
+  errorContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  errorEmoji: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: THEME.textPrimary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorSubtitle: {
+    fontSize: 14,
+    color: THEME.textSecondary,
+    textAlign: 'center',
+    marginBottom: 28,
+    lineHeight: 20,
+    maxWidth: 280,
+  },
+  errorButton: {
+    backgroundColor: THEME.accentGreen,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 14,
+  },
+  errorButtonText: {
+    color: '#09090B',
+    fontWeight: '700',
+    fontSize: 15,
   },
 });

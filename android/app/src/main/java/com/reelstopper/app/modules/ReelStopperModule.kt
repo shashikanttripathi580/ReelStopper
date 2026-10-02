@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.Promise
@@ -27,44 +28,89 @@ class ReelStopperModule(private val reactContext: ReactApplicationContext) :
 
     private var reelReceiver: BroadcastReceiver? = null
 
-    init {
-        reactContext.addLifecycleEventListener(this)
-        registerBroadcastReceiver()
-    }
-
     override fun getName(): String = "ReelStopperModule"
 
-    private fun registerBroadcastReceiver() {
-        reelReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == ReelAccessibilityService.ACTION_REEL_INCREMENTED) {
-                    val count = intent.getIntExtra(ReelAccessibilityService.EXTRA_COUNT, 0)
-                    val app = intent.getStringExtra(ReelAccessibilityService.EXTRA_APP) ?: "Reels"
+    override fun initialize() {
+        super.initialize()
+        try {
+            reactContext.addLifecycleEventListener(this)
+            registerBroadcastReceiver()
+        } catch (e: Exception) {
+            Log.e("ReelStopperModule", "Error in initialize", e)
+        }
+    }
 
-                    val params = Arguments.createMap().apply {
-                        putInt("count", count)
-                        putString("app", app)
-                        putDouble("timestamp", System.currentTimeMillis().toDouble())
+    override fun invalidate() {
+        super.invalidate()
+        try {
+            reactContext.removeLifecycleEventListener(this)
+            unregisterReceiverSafely()
+        } catch (e: Exception) {
+            Log.e("ReelStopperModule", "Error in invalidate", e)
+        }
+    }
+
+    private fun registerBroadcastReceiver() {
+        if (reelReceiver != null) return
+        try {
+            reelReceiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context?, intent: Intent?) {
+                    if (intent?.action == ReelAccessibilityService.ACTION_REEL_INCREMENTED) {
+                        val count = intent.getIntExtra(ReelAccessibilityService.EXTRA_COUNT, 0)
+                        val app = intent.getStringExtra(ReelAccessibilityService.EXTRA_APP) ?: "Reels"
+
+                        val params = Arguments.createMap().apply {
+                            putInt("count", count)
+                            putString("app", app)
+                            putDouble("timestamp", System.currentTimeMillis().toDouble())
+                        }
+                        sendEvent("onReelIncremented", params)
                     }
-                    sendEvent("onReelIncremented", params)
                 }
             }
-        }
 
-        val filter = IntentFilter(ReelAccessibilityService.ACTION_REEL_INCREMENTED)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            reactContext.registerReceiver(reelReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        } else {
-            reactContext.registerReceiver(reelReceiver, filter)
+            val filter = IntentFilter(ReelAccessibilityService.ACTION_REEL_INCREMENTED)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                reactContext.registerReceiver(reelReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                reactContext.registerReceiver(reelReceiver, filter)
+            }
+        } catch (e: Exception) {
+            Log.e("ReelStopperModule", "Failed to register broadcast receiver", e)
+        }
+    }
+
+    private fun unregisterReceiverSafely() {
+        reelReceiver?.let {
+            try {
+                reactContext.unregisterReceiver(it)
+            } catch (e: Exception) {
+                // Ignore if already unregistered
+            }
+            reelReceiver = null
         }
     }
 
     private fun sendEvent(eventName: String, params: Any?) {
-        if (reactContext.hasActiveReactInstance()) {
-            reactContext
-                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-                .emit(eventName, params)
+        try {
+            if (reactContext.hasActiveReactInstance()) {
+                reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                    .emit(eventName, params)
+            }
+        } catch (e: Exception) {
+            Log.e("ReelStopperModule", "Failed to send event: $eventName", e)
         }
+    }
+
+    @ReactMethod
+    fun addListener(type: String?) {
+        // Keep React Native NativeEventEmitter happy
+    }
+
+    @ReactMethod
+    fun removeListeners(count: Int) {
+        // Keep React Native NativeEventEmitter happy
     }
 
     @ReactMethod
@@ -78,37 +124,49 @@ class ReelStopperModule(private val reactContext: ReactApplicationContext) :
             val isEnabled = enabledServices.contains(serviceName) || ReelAccessibilityService.isServiceRunning
             promise.resolve(isEnabled)
         } catch (e: Exception) {
-            promise.reject("ERR_PERMISSION_CHECK", e.message)
+            promise.resolve(false)
         }
     }
 
     @ReactMethod
     fun openAccessibilitySettings() {
-        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        try {
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            reactContext.startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("ReelStopperModule", "Failed to open accessibility settings", e)
         }
-        reactContext.startActivity(intent)
     }
 
     @ReactMethod
     fun isOverlayPermissionGranted(promise: Promise) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            promise.resolve(Settings.canDrawOverlays(reactContext))
-        } else {
-            promise.resolve(true)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                promise.resolve(Settings.canDrawOverlays(reactContext))
+            } else {
+                promise.resolve(true)
+            }
+        } catch (e: Exception) {
+            promise.resolve(false)
         }
     }
 
     @ReactMethod
     fun openOverlaySettings() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:${reactContext.packageName}")
-            ).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:${reactContext.packageName}")
+                ).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                reactContext.startActivity(intent)
             }
-            reactContext.startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("ReelStopperModule", "Failed to open overlay settings", e)
         }
     }
 
@@ -160,18 +218,16 @@ class ReelStopperModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun getCurrentCount(promise: Promise) {
-        promise.resolve(ReelAccessibilityService.getSessionCount())
+        try {
+            promise.resolve(ReelAccessibilityService.getSessionCount())
+        } catch (e: Exception) {
+            promise.resolve(0)
+        }
     }
 
     override fun onHostResume() {}
     override fun onHostPause() {}
     override fun onHostDestroy() {
-        reelReceiver?.let {
-            try {
-                reactContext.unregisterReceiver(it)
-            } catch (e: Exception) {
-                // Already unregistered
-            }
-        }
+        unregisterReceiverSafely()
     }
 }

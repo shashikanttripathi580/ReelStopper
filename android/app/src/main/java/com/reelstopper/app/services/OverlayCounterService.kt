@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
@@ -75,10 +76,23 @@ class OverlayCounterService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        createNotificationChannels()
-        startForeground(NOTIFICATION_ID, buildForegroundNotification())
-        createFloatingView()
+        try {
+            windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            createNotificationChannels()
+            val notification = buildForegroundNotification()
+            if (Build.VERSION.SDK_INT >= 34) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+            createFloatingView()
+        } catch (e: Exception) {
+            Log.e("OverlayCounterService", "Error in onCreate", e)
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

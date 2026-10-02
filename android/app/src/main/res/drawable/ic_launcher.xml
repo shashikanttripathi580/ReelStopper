@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Dark background circle -->
+    <path
+        android:fillColor="#09090B"
+        android:pathData="M0,0h108v108h-108z" />
+    <path
+        android:fillColor="#166534"
+        android:pathData="M54,14 A40,40 0 1 0 54,94 A40,40 0 1 0 54,14 Z" />
+    <!-- Seedling leaf shape in vibrant green -->
+    <path
+        android:fillColor="#22C55E"
+        android:pathData="M54,74 C54,54 40,44 28,44 C28,60 40,74 54,74 Z" />
+    <path
+        android:fillColor="#4ADE80"
+        android:pathData="M54,74 C54,48 70,36 84,34 C84,52 68,74 54,74 Z" />
+    <!-- Stem -->
+    <path
+        android:strokeColor="#15803D"
+        android:strokeWidth="3"
+        android:pathData="M54,74 L54,82" />
+</vector>
